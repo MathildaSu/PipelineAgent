@@ -1,20 +1,5 @@
 import os
-
 from autogen import ConversableAgent
-
-llm_config = config_list = autogen.config_list_from_json(
-    "OAI_CONFIG_LIST",
-    filter_dict={
-        "model": ["gpt4", "gpt-4-32k", "gpt-4-32k-0314", "gpt-4-32k-v0314"],
-    },
-)
-
-llm_config = {
-    "timeout": 600,
-    "cache_seed": 42,
-    "config_list": config_list,
-    "temperature": 0.02,
-}
 
 
 DEA = ConversableAgent(
@@ -48,6 +33,7 @@ DEA = ConversableAgent(
     default_auto_reply = "Data engineer Agent has finished its conversation. ", 
     function_map=None,  # No registered functions, by default it is None.
 )
+
 
 IA = ConversableAgent(
     "IA",
@@ -92,7 +78,6 @@ IA = ConversableAgent(
     function_map=None,  # No registered functions, by default it is None.
 )
 
-
 MLA = ConversableAgent(
     "MLA",
     description = """## You are a professional machine learning engineer. You are an expert in the following domain:
@@ -121,7 +106,6 @@ MLA = ConversableAgent(
     default_auto_reply = "Machine learning Agent has finished its conversation. ", 
     function_map=None,  # No registered functions, by default it is None.
 )
-
 
 
 BOA = ConversableAgent(
@@ -158,11 +142,11 @@ CDA = ConversableAgent(
     description = """## You are a Conversation Delegation Agent. You have a set of conversational rules and steps to follow and progress the conversations:
 
 # conversational rules:
- 1. There are four working agents: machine learning agent, infrustructure agent,  data engineer agent, and business objective agent. They each focus on their own specialties based on their descriptions. 
+ 1. There are four working agents: MLA (machine learning agent), IA (infrustructure agent),  DEA (data engineer agent), and BOA (business objective agent). They each focus on their own specialties based on their descriptions. 
  2. There are three additional assistant agents: Knowledge Integration Agent, Evaluate and Refinement Agent, and you the conversation delegation agent. 
  3. Only the agent you have selected to speak next can speak. all other agents must remain silent.
  4. The selected agent to speak can only talk about and discuss the topic you asked them to discuss about. 
- 5. Everytime one working agent has presented, you need to call the Knowledge Integration Agent to summarise the conversation up until the current point, and maintain the shared design and coding files upto date. Then you need to call the Evaluate and Refinement Agent to evaluate on the current proposal, or design, or codes. 
+ 5. Only select from the four working agents (MAL, IA, DEA, NOA) to speak next when you are asked to select the next speaking agent. 
 
 # Conversational steps: 
  1. The entire conversation happens in 3 steps: proposal, discussion, reaching consensus. 
@@ -173,12 +157,12 @@ CDA = ConversableAgent(
  6. In consensus step, the four working agents must reach a consensus on the design/code. 
 
 # Important rules:
-1. you must speak everytime a working agent has spoken, to request Knowledge Integration Agent to summarise, and Evaluate and Refinement Agent to evaluate, before calling on the next working agent to continue the current step or progree into the next step. 
-2. Remember the objective given by the user. If the conversation is going out of the scope of the users requirement, remind the next speaker about the requirement. 
-3. The business objective agent is not required to provide opinion on the actuall coding or technical choises. But instead, it needs to focus on effectiveness, cost, scalability, and efficiency. 
-4. ** DO NOT ATTEMPT TO DO ANYTHING USE HAVE NOT ASKED **
+1. Remember the objective given by the user. If the conversation is going out of the scope of the users requirement, remind the next speaker about the requirement. 
+2. The business objective agent is not required to provide opinion on the actuall coding or technical choises. But instead, it needs to focus on effectiveness, cost, scalability, and efficiency. 
+3. ** Return in the the format of {"speaker": agent, "instruction": instruction} **
+4. ** DO NOT ATTEMPT TO DO ANYTHING THE USER HAVE NOT ASKED **
  """, 
-    system_message = """Based on your instruction, and the conversation history, choose the next speaker. Ask the next speaker to focus on the current step in the conversation, or progress into the next step. """, 
+    system_message = """Based on your instruction, and the conversation history, choose the next speaker. Ask the next speaker to focus on the current step in the conversation, or progress into the next step. Output JSON with format *** {"speaker": agent, "instruction": instruction} ***""", 
     llm_config={"config_list": [{"model": "gpt-4", "api_key": os.environ.get("OPENAI_API_KEY")}]},
     code_execution_config={"use_docker":"amazon/aws-cli"},  # Turn off code execution, by default it is off.
     max_consecutive_auto_reply = 3, 
@@ -186,6 +170,7 @@ CDA = ConversableAgent(
     default_auto_reply = "Conversation Delegation Agent has finished its conversation. ", 
     function_map=None,  # No registered functions, by default it is None.
 )
+
 
 KIA = ConversableAgent(
     "KIA",
@@ -212,17 +197,15 @@ KIA = ConversableAgent(
     function_map=None,  # No registered functions, by default it is None.
 )
 
-
 ERA = ConversableAgent(
     "ERA",
     description = """## You are a Evaluate and Refinement Agent. You need to evaluate the design and coding proposed based on the following criterea:
 
-# Evaluation Metrics:
- 1. There are four working agents: machine learning agent, infrustructure agent,  data engineer agent, and business objective agent. They each focus on their own specialties based on their descriptions. 
- 2. There are three additional assistant agents: Knowledge Integration Agent, Evaluate and Refinement Agent, and you the conversation delegation agent. 
- 3. Only the agent you have selected to speak next can speak. all other agents must remain silent.
- 4. The selected agent to speak can only talk about and discuss the topic you asked them to discuss about. 
- 5. Everytime one working agent has presented, you need to call the Knowledge Integration Agent to summarise the conversation up until the current point, and maintain the shared design and coding files upto date. Then you need to call the Evaluate and Refinement Agent to evaluate on the current proposal, or design, or codes. 
+# Evaluation Metrics (given the score out of 10):
+ 1. Quality score: measures the overall quality of the pipeline design. 
+ 2. Efficiency score: evaluates the computational and resource efficiency of the pipeline. 
+ 3. Compliance score: assesses adherence to business rules and regulatory requirements. 
+ 4. Maintainability score: evaluates the long-term maintainability and adaptability of the pipeline. 
 
 # Important rules:
 1. The evaluation must be objective and using empirical measures. 
@@ -239,7 +222,6 @@ ERA = ConversableAgent(
     function_map=None,  # No registered functions, by default it is None.
 )
 
-
 # create a UserProxyAgent instance named "user_proxy"
 user_proxy = autogen.UserProxyAgent(
     name="user_proxy",
@@ -251,5 +233,5 @@ user_proxy = autogen.UserProxyAgent(
     },  # Please set use_docker=True if docker is available to run the generated code. Using docker is safer than running the generated code directly.
     llm_config=llm_config,
     system_message="""Reply TERMINATE if the task has been solved at full satisfaction.
-Otherwise, reply CONTINUE, or the reason why the task is not solved yet.""",
+Otherwise, reply CONTINUE, and the reason why the task is not solved yet.""",
 )
