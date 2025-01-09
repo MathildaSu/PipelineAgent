@@ -82,7 +82,7 @@ KIA = ConversableAgent(
 ERA = ConversableAgent(
     "ERA",
     description = generate_prompt("propmts/agents/evaluate-and-refine.prompt"), 
-    system_message = """Based on your instruction, and the conversation history, choose the next speaker. Ask the next speaker to focus on the current step in the conversation, or progress into the next step. """, 
+    system_message = """Based on your instruction, and the conversation history, evaluate the design and coding proposed in the score out of 10 in the four criterea: Quality score, Efficiency score, Compliance score, Maintainability score. """, 
     llm_config={"config_list": [{"model": "gpt-4", "api_key": os.environ.get("OPENAI_API_KEY")}]},
     code_execution_config={"use_docker":"amazon/aws-cli"},  # Turn off code execution, by default it is off.
     max_consecutive_auto_reply = 3, 
