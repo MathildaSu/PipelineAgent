@@ -2,7 +2,7 @@ import os
 import autogen
 
 from autogen import ConversableAgent
-
+from utils import generate_prompt
 llm_config = config_list = autogen.config_list_from_json(
     "OAI_CONFIG_LIST",
     filter_dict={
@@ -16,15 +16,6 @@ llm_config = {
     "config_list": config_list,
     "temperature": 0.02,
 }
-
-def generate_prompt(prompt_filepath):
-    with open(prompt_filepath, "r") as f:
-        prompt_template = f.read()
-
-        # Add details/variables to template here as needed
-        #
-
-        return prompt_template
 
 
 DEA = ConversableAgent(
