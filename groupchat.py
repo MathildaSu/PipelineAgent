@@ -7,7 +7,6 @@ class customised_groupchat(GroupChat):
     def _process_speaker_selection_result(self, result, last_speaker: ConversableAgent, agents: Optional[List[Agent]]):
         """Checks the result of the auto_select_speaker function, returning the
         agent to speak.
-
         Used by auto_select_speaker and a_auto_select_speaker."""
         if len(result.chat_history) > 0:
             # Use the final message, which will have the selected agent or reason for failure
@@ -16,7 +15,7 @@ class customised_groupchat(GroupChat):
             speaker = final_message["speaker"]
             instruction_message = final_message["instruction"]
 
-            if "[AGENT SELECTED]" in final_message:
+            if speaker:
                 # Have successfully selected an agent, return it
                 return self.agent_by_name(speaker),instruction_message
 
