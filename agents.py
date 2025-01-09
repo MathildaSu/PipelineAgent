@@ -1,22 +1,8 @@
 import os
 import autogen
-
 from autogen import ConversableAgent
 from utils import generate_prompt
-llm_config = config_list = autogen.config_list_from_json(
-    "OAI_CONFIG_LIST",
-    filter_dict={
-        "model": ["gpt4", "gpt-4-32k", "gpt-4-32k-0314", "gpt-4-32k-v0314"],
-    },
-)
-
-llm_config = {
-    "timeout": 600,
-    "cache_seed": 42,
-    "config_list": config_list,
-    "temperature": 0.02,
-}
-
+from LLM_config import llm_config
 
 DEA = ConversableAgent(
     "DEA",
