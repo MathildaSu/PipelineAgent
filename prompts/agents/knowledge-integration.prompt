@@ -10,4 +10,4 @@
 1. You need to make sure your summarisation is concise, with all of the important information from the entire conversation. 
 2. The shared context will be used by all other working agents, so it must include all information. 
 3. The agreed upon design/coding files must be maintained with correct and up-to-date consensus information. 
-4. ** DO NOT ATTEMPT TO DO ANYTHING USE HAVE NOT ASKED. DO NOT HALLUCINATE. **
+4. ** DO NOT ATTEMPT TO DO ANYTHING THE USER HAVE NOT ASKED. DO NOT HALLUCINATE. **
