@@ -1,0 +1,7 @@
+model_list:
+  - model_name: claude-3-opus
+    litellm_params:
+      model: claude-3-opus-20240229
+      api_base: https://api.anthropic.com/v1/messages/
+      api_key: <your-api-key>
+      stream: False
