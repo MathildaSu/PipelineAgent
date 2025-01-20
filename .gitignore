@@ -1,21 +1,3 @@
 # directories
-__deprecated__/
-**/__pycache__/
-data/finetunedata/*.json
-data/multiwoz/data/
-data/multiwoz/ubar-preprocessing/data/
-data/multiwoz/ubar-preprocessing/db/
-data/pre-training_corpora/processed_data/
-data/pre-training_corpora/prompting_data/
-data/pre-training_corpora/raw_data/
-data/pre-training_corpora/separate_datasets/
-wandb/
-ckpt/
-outputs/
-
-# files
-*~
-*out
-*.pyc
-*.bin
-*.slurm
+__pycache__/
+.cache
