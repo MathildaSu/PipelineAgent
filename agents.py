@@ -1,7 +1,7 @@
 import os
 from autogen.agentchat.assistant_agent import AssistantAgent
 from autogen.agentchat.user_proxy_agent import UserProxyAgent
-from instruct_agent import InstructAgent
+# from instruct_agent import InstructAgent
 from memory_agent import MemoryAgent
 
 # from instruct_last_agent import InstructionAgent
@@ -169,7 +169,7 @@ CDA = MemoryAgent(
 )
 
 
-KIA = InstructAgent(
+KIA = AssistantAgent(
     "KownledgeIntergrationAgent",
     description=generate_prompt("prompts/agents/knowledge-integration.prompt"),
     # system_message = '''You are a Kownledge Intergration Engineer.
@@ -189,7 +189,7 @@ KIA = InstructAgent(
     function_map=None,  # No registered functions, by default it is None.
 )
 
-ERA = InstructAgent(
+ERA = AssistantAgent(
     "EveluateRefinementAgent",
     description=generate_prompt("prompts/agents/evaluate-and-refine.prompt"),
     # system_message = """You are a Evaluation and Refinement Analyst, your role is to ensure the integrity and reliability of the data pipeline. You will develop data validation rules, monitor data quality, and implement cleansing processes. Your task is to identify and rectify inconsistencies, ensuring the data is accurate and trustworthy for downstream analytics and decision-making processes.
