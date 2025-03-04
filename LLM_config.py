@@ -1,13 +1,25 @@
 import os
 
 from autogen import config_list_from_json
+from pydantic import BaseModel
+class Component(BaseModel):
+        pros: str
+        cons: str
+        design: str
+        details: str
 
+class ComponentsMemory (BaseModel):
+        aim: str
+        Platform: str
+        Components: list[Component]
+        output: str
 
 config_list = [
     {
-        "model": "deepseek-r1:7b",
+        "model": "llama3.2:latest",
         "base_url": "http://localhost:11434/v1",
         "api_key": "ollama",
+        # "response_format":ComponentsMemory, 
     },
     # {
     #     "model": "claude",
@@ -29,10 +41,25 @@ llm_config = {
     "temperature": 0.02,
 }
 
+class CDMemory(BaseModel):
+    num_proposals:int|None =0
+    num_discussions: int|None =0
+    num_consensus: int|None =0
+    final_output_obtained: bool|None=False
+    output: str
+
+CDA_config_list = [
+    {
+        "model": "llama3.2:latest",
+        "base_url": "http://localhost:11434/v1",
+        "api_key": "ollama",
+        # "response_format":CDMemory, 
+    }]
+
 llm_CDA_config = {
     "timeout": 600,
     "cache_seed": 42,
-    "config_list": config_list,
+    "config_list": CDA_config_list,
     "temperature": 0.02,
     # "max_tokens": 80,  # Force brief responses
     # "stop": ["\n\n"],  # Prevent verbose output

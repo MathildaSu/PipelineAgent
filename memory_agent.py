@@ -48,9 +48,11 @@ class MemoryAgent(AssistantAgent):
 
     def __init__(
         self,
-        memory_json: Optional[Dict] = None,
+        structured_output: BaseModel,
+        memory_json: Dict = None,
         memory_update_prompt: Optional[str] = None,
         memory_reply_prompt: Optional[str] = None,
+
         *args,
         **kwargs
     ):
@@ -69,7 +71,13 @@ class MemoryAgent(AssistantAgent):
         self.replace_reply_func(
             ConversableAgent.generate_oai_reply, MemoryAgent.generate_oai_reply
         )
-        self.memory_format = self.memory_to_structured_output()
+        self.strucutred_output = structured_output
+        strucutred_output_config = self.llm_config.copy()
+        strucutred_output_config['config_list'][0].update(response_format = self.strucutred_output)
+
+        self.client_memory = OpenAIWrapper(**strucutred_output_config)
+
+
 
     def memory_to_structured_output(self) -> BaseModel:
         from pydantic import create_model
@@ -86,7 +94,6 @@ class MemoryAgent(AssistantAgent):
 
         model = dict_model("memory",self.memory)
         return model
-
 
     @property
     def memory(self) -> dict:
@@ -105,6 +112,8 @@ class MemoryAgent(AssistantAgent):
         sender: Optional[Agent] = None,
         config: Optional[OpenAIWrapper] = None,
     ) -> Tuple[bool, Union[str, Dict, None]]:
+        import pdb
+
         """Generate a reply using autogen.oai."""
         client = self.client if config is None else config
         if client is None:
@@ -133,7 +142,7 @@ class MemoryAgent(AssistantAgent):
             }
         ]
         memory_response = self._generate_oai_reply_from_client(
-            self.client, messages + instruction, self.client_cache
+            self.client_memory, messages + instruction, self.client_cache
         )
         
         iostream = IOStream.get_default()
@@ -181,3 +190,110 @@ class MemoryAgent(AssistantAgent):
             ),
         )
 
+    # def send(
+    #     self,
+    #     message: Union[Dict, str],
+    #     recipient: Agent,
+    #     request_reply: Optional[bool] = None,
+    #     silent: Optional[bool] = False,
+    # ):
+    #     """Send a message to another agent.
+
+    #     Args:
+    #         message (dict or str): message to be sent.
+    #             The message could contain the following fields:
+    #             - content (str or List): Required, the content of the message. (Can be None)
+    #             - function_call (str): the name of the function to be called.
+    #             - name (str): the name of the function to be called.
+    #             - role (str): the role of the message, any role that is not "function"
+    #                 will be modified to "assistant".
+    #             - context (dict): the context of the message, which will be passed to
+    #                 [OpenAIWrapper.create](../oai/client#create).
+    #                 For example, one agent can send a message A as:
+    #     ```python
+    #     {
+    #         "content": lambda context: context["use_tool_msg"],
+    #         "context": {
+    #             "use_tool_msg": "Use tool X if they are relevant."
+    #         }
+    #     }
+    #     ```
+    #                 Next time, one agent can send a message B with a different "use_tool_msg".
+    #                 Then the content of message A will be refreshed to the new "use_tool_msg".
+    #                 So effectively, this provides a way for an agent to send a "link" and modify
+    #                 the content of the "link" later.
+    #         recipient (Agent): the recipient of the message.
+    #         request_reply (bool or None): whether to request a reply from the recipient.
+    #         silent (bool or None): (Experimental) whether to print the message sent.
+
+    #     Raises:
+    #         ValueError: if the message can't be converted into a valid ChatCompletion message.
+    #     """
+    #     memory = self._update_memory(messages=[message], sender=self)
+    #     iostream = IOStream.get_default()
+    #     # print the message received
+    #     iostream.print(colored("***** Memory *****", "green"), flush=True)
+    #     iostream.print(self.memory_json, flush=True)
+
+    #     message = self._process_message_before_send(message, recipient, ConversableAgent._is_silent(self, silent))
+    #     # When the agent composes and sends the message, the role of the message is "assistant"
+    #     # unless it's "function".
+    #     valid = self._append_oai_message(message, "assistant", recipient, is_sending=True)
+    #     if valid:
+    #         recipient.receive(message, self, request_reply, silent)
+    #     else:
+    #         raise ValueError(
+    #             "Message can't be converted into a valid ChatCompletion message. Either content or function_call must be provided."
+    #         )
+
+    # async def a_send(
+    #     self,
+    #     message: Union[Dict, str],
+    #     recipient: Agent,
+    #     request_reply: Optional[bool] = None,
+    #     silent: Optional[bool] = False,
+    # ):
+    #     """(async) Send a message to another agent.
+
+    #     Args:
+    #         message (dict or str): message to be sent.
+    #             The message could contain the following fields:
+    #             - content (str or List): Required, the content of the message. (Can be None)
+    #             - function_call (str): the name of the function to be called.
+    #             - name (str): the name of the function to be called.
+    #             - role (str): the role of the message, any role that is not "function"
+    #                 will be modified to "assistant".
+    #             - context (dict): the context of the message, which will be passed to
+    #                 [OpenAIWrapper.create](../oai/client#create).
+    #                 For example, one agent can send a message A as:
+    #     ```python
+    #     {
+    #         "content": lambda context: context["use_tool_msg"],
+    #         "context": {
+    #             "use_tool_msg": "Use tool X if they are relevant."
+    #         }
+    #     }
+    #     ```
+    #                 Next time, one agent can send a message B with a different "use_tool_msg".
+    #                 Then the content of message A will be refreshed to the new "use_tool_msg".
+    #                 So effectively, this provides a way for an agent to send a "link" and modify
+    #                 the content of the "link" later.
+    #         recipient (Agent): the recipient of the message.
+    #         request_reply (bool or None): whether to request a reply from the recipient.
+    #         silent (bool or None): (Experimental) whether to print the message sent.
+
+    #     Raises:
+    #         ValueError: if the message can't be converted into a valid ChatCompletion message.
+    #     """
+    #     message = await self._a_process_message_before_send(
+    #         message, recipient, self._is_silent(self, silent)
+    #     )
+    #     # When the agent composes and sends the message, the role of the message is "assistant"
+    #     # unless it's "function".
+    #     valid = self._append_oai_message(message, "assistant", recipient, is_sending=True)
+    #     if valid:
+    #         await recipient.a_receive(message, self, request_reply, silent)
+    #     else:
+    #         raise ValueError(
+    #             "Message can't be converted into a valid ChatCompletion message. Either content or function_call must be provided."
+    #         )
