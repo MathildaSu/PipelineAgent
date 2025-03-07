@@ -154,12 +154,6 @@ CDA = MemoryAgent(
     # Your system messages should provide clear instructions for next speaker, ensuring a well-organized and productive workflow.
     # Once all tasks are completed, you will summarize the overall design of the data pipeline, provide a high-level overview of the data pipeline's functionality, produce any required file, and end with "TERMINATE". """,
     system_message=generate_prompt("prompts/agents/conversation-delegation.prompt"),
-    memory_json={
-        "PROPOSAL_COUNT": 0,
-        "DISCUSSION_ROUND": 0,
-        "CONCENSUS_COUNT": 0,
-        "final output json obtained": "false",
-    },
     structured_output=CDMemory,
     # llm_config=llm_config.update(response_format = ComponentsMemory),
     llm_config=llm_CDA_config,
