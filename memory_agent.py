@@ -49,7 +49,6 @@ class MemoryAgent(AssistantAgent):
     def __init__(
         self,
         structured_output: BaseModel,
-        memory_json: Dict = None,
         memory_update_prompt: Optional[str] = None,
         memory_reply_prompt: Optional[str] = None,
 
@@ -57,7 +56,8 @@ class MemoryAgent(AssistantAgent):
         **kwargs
     ):
         super().__init__(*args, **kwargs)
-        self.memory_json = memory_json if memory_json != None else {}
+        self.strucutred_output = structured_output
+        self.memory_json = self.strucutred_output().model_dump(mode='json')
         self.memory_update_prompt = (
             memory_update_prompt
             if memory_update_prompt != None
@@ -71,7 +71,6 @@ class MemoryAgent(AssistantAgent):
         self.replace_reply_func(
             ConversableAgent.generate_oai_reply, MemoryAgent.generate_oai_reply
         )
-        self.strucutred_output = structured_output
         strucutred_output_config = self.llm_config.copy()
         strucutred_output_config['config_list'][0].update(response_format = self.strucutred_output)
 
@@ -149,12 +148,17 @@ class MemoryAgent(AssistantAgent):
         iostream.print(colored("***** raw Memory *****", "green"), flush=True)
         iostream.print(memory_response, flush=True)
 
-        pattern = regex.compile(r'\{(?:[^{}]|(?R))*\}')
-        a = pattern.findall(memory_response.strip())
-        self.memory_json = json.loads(a[0])
+        # pattern = regex.compile(r'\{(?:[^{}]|(?R))*\}')
+        # a = pattern.findall(memory_response.strip())
+        try:
+            self.memory_json = json.loads(memory_response["content"])
         # print the message received
-        iostream.print(colored("***** loaded Memory *****", "green"), flush=True)
-        iostream.print(self.memory_json, flush=True)
+        except:
+            iostream.print(colored("***** loaded Memory *****", "green"), flush=True)
+            iostream.print("illegal format", flush=True)
+        else:
+            iostream.print(colored("***** loaded Memory *****", "green"), flush=True)
+            iostream.print(self.memory_json, flush=True)
 
         return (
             (False, None) if extracted_response is None else (True, extracted_response)

@@ -3,7 +3,7 @@ from autogen import GroupChat,GroupChatManager
 from agents import DEA, MLA, IA, BOA, CDA, KIA, ERA, DJE, user_proxy
 from LLM_config import llm_config
 from utils import generate_prompt 
-
+from autogen.agentchat.contrib.capabilities import transform_messages, transforms
 
 # tracker = StateTracker()
 
@@ -18,26 +18,43 @@ worker_counter = 0
 def custom_speaker_selection_func(last_speaker, groupchat: GroupChat):
     workers = [BOA, DEA, MLA, IA]
     # if "final" groupchat.last_message
-    if last_speaker is user_proxy: 
-        return CDA
+    # if last_speaker is user_proxy: 
+    #     return CDA
     if last_speaker is CDA: 
         global worker_counter
         w = workers[worker_counter%4]
         worker_counter += 1
         return w
-    elif last_speaker in workers:
-        if worker_counter %4 == 0:
-            return KIA
-        else: 
-            return CDA
-    elif last_speaker is KIA:
-            return ERA
-    elif last_speaker is ERA:
-            return CDA
+    else:
+        return CDA
+    # elif last_speaker in workers:
+    #     if worker_counter %4 == 0:
+    #         return KIA
+    #     else: 
+    #         return CDA
+    # elif last_speaker is KIA:
+    #         return ERA
+    # elif last_speaker is ERA:
+    #         return CDA
     
 
+context_handling = transform_messages.TransformMessages(
+    transforms=[
+        transforms.MessageHistoryLimiter(max_messages=8),
+        transforms.MessageTokenLimiter(max_tokens=1000, max_tokens_per_message=100, min_tokens=500),
+    ]
+)
+
+context_handling.add_to_agent(CDA)
+context_handling.add_to_agent(DEA)
+context_handling.add_to_agent(MLA)
+context_handling.add_to_agent(IA)
+context_handling.add_to_agent(BOA)
+
+
 group_chat = GroupChat(
-    [CDA]+[DEA, MLA, IA, BOA, KIA, ERA, user_proxy],
+    # [CDA]+[DEA, MLA, IA, BOA, KIA, ERA, user_proxy],
+    [CDA]+[DEA, MLA, IA, BOA, user_proxy],
     messages=[],
     select_speaker_message_template=generate_prompt("prompts/select_speaker_message_template.prompt"),
     select_speaker_prompt_template=generate_prompt("prompts/select_speaker_prompt_template.prompt"),
@@ -71,8 +88,8 @@ There are 6 camera sources with data in .jpg format; 1 lidar source in .pcd.bin 
 - Estimate the cloud resources, implementation efforts, and associated costs, providing a rough breakdown and complexity rating.
 - Generate a `PIPELINE_OVERVIEW.json` file, detailing the proposed complete architecture in JSON format with the following fields: 
  - “Platform“: A cloud service provider’s name if the cloud solution is the best, or “local server” if locally hosted servers are preferred. 
- - “Component 1”: The first component in the pipeline framework. 
- - “Component 2”: The second component in the pipeline framework. Continue until all required components are listed. 
+ - “Component 1”: The first component in the pipeline framework, with AWS official name. 
+ - “Component 2”: The second component in the pipeline framework, with AWS official name. Continue until all required components are listed. 
  - “Implementation difficulties": A rating from 1 to 10 (lowest to highest). 
  - “Maintainess difficulties”: A rating from 1 to 10 (lowest to highest). 
 

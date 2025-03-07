@@ -1,29 +1,30 @@
 import os
-from autogen.agentchat.assistant_agent import AssistantAgent
-from autogen.agentchat.user_proxy_agent import UserProxyAgent
-# from instruct_agent import InstructAgent
-from memory_agent import MemoryAgent
+from typing import Optional, Union
+from pydantic import BaseModel
 
-# from instruct_last_agent import InstructionAgent
+from memory_agent import MemoryAgent
 from utils import generate_prompt
 from LLM_config import llm_config, llm_CDA_config
-import os
-from pydantic import BaseModel
-from autogen_ext.models.openai import OpenAIChatCompletionClient
+
+from autogen.agentchat.assistant_agent import AssistantAgent
+from autogen.agentchat.user_proxy_agent import UserProxyAgent
 
 print(os.getcwd())
 
+
 class Component(BaseModel):
-        pros: str
-        cons: str
-        design: str
-        details: str
+    AWS_NAME: Optional[str] = ""
+    pros: Optional[str] = ""
+    cons: Optional[str] = ""
+    design: Optional[str] = ""
+    details: Optional[str] = ""
 
-class ComponentsMemory (BaseModel):
-        aim: str
-        Platform: str
-        Components: list[Component] | None = None
 
+class ComponentsMemory(BaseModel):
+    Aim: Optional[str] = ""
+    Platform: Optional[str] = ""
+    Components: Optional[Union[list[Component], Component]] = [Component()]
+    # output: str|None = ""
 
 
 DEA = MemoryAgent(
@@ -39,21 +40,12 @@ DEA = MemoryAgent(
     #     - Keep the conversation focused on data engineering choices, technologies, and potential challenges.
     #     - Output your deliverables in full when assigned a task.''',
     system_message=generate_prompt("prompts/agents/data-engineer.prompt"),
-    memory_json={
-        "aim": "",
-        "Platform": "",
-        "Component_1": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_2": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_3": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_4": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_5": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-    },
-    structured_output = ComponentsMemory, 
+    structured_output=ComponentsMemory,
     # memory_update_prompt= "Read the newest response to the chat, and populate the json with factual imformation. JSON: {memory}",
     # memory_reply_prompt= "With the above instruction and chathistory, together with the following json that may or may not have recorded your proposal and comments, Do what the conversation delegation agent has asked you to. Json summary: {memory}",
     # llm_config=llm_config.update(response_format = ComponentsMemory),
     llm_config=llm_config,
-    # model_client = DEA_client, 
+    # model_client = DEA_client,
     code_execution_config=False,
     # code_execution_config={"use_docker":"amazon/aws-cli"},  # Turn off code execution, by default it is off.
     max_consecutive_auto_reply=10,
@@ -74,21 +66,12 @@ IA = MemoryAgent(
     #     - Keep the conversation focused on architectural choices, technologies, and potential challenges.
     #     - Output your deliverables in full when assigned a task.''',
     system_message=generate_prompt("prompts/agents/infrastructure.prompt"),
-    memory_json={
-        "aim": "",
-        "Platform": "",
-        "Component_1": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_2": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_3": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_4": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_5": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-    },
-    structured_output = ComponentsMemory, 
+    structured_output=ComponentsMemory,
     # memory_update_prompt= "Read the newest response to the chat, and populate the json with factual imformation. JSON: {memory}",
     # memory_reply_prompt= "With the above instruction and chathistory, together with the following json that may or may not have recorded your proposal and comments, Do what the conversation delegation agent has asked you to. Json summary: {memory}",
     # llm_config=llm_config.update(response_format = ComponentsMemory),
     llm_config=llm_config,
-    # model_client = IA_client, 
+    # model_client = IA_client,
     code_execution_config=False,
     max_consecutive_auto_reply=10,
     human_input_mode="TERMINATE",
@@ -109,21 +92,12 @@ MLA = MemoryAgent(
     #     - Keep the conversation focused on design choices, technologies, and potential challenges.
     #     - Output your deliverables in full when assigned a task.''',
     system_message=generate_prompt("prompts/agents/machine-learning.prompt"),
-    memory_json={
-        "aim": "",
-        "Platform": "",
-        "Component_1": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_2": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_3": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_4": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_5": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-    },
-    structured_output = ComponentsMemory, 
+    structured_output=ComponentsMemory,
     # memory_update_prompt= "Read the newest response to the chat, and populate the json with factual imformation. JSON: {memory}",
     # memory_reply_prompt= "With the above instruction and chathistory, together with the following json that may or may not have recorded your proposal and comments, Do what the conversation delegation agent has asked you to. Json summary: {memory}",
     # llm_config=llm_config.update(response_format = ComponentsMemory),
     llm_config=llm_config,
-    # model_client = MLA_client, 
+    # model_client = MLA_client,
     code_execution_config=False,
     max_consecutive_auto_reply=10,
     human_input_mode="TERMINATE",
@@ -143,21 +117,12 @@ BOA = MemoryAgent(
     #     - Keep the conversation focused on design choices, technologies, and potential challenges, and business objectives.
     #     - Output your deliverables in full when assigned a task.''',
     system_message=generate_prompt("prompts/agents/business-objective.prompt"),
-    memory_json=dict({
-        "aim": "",
-        "Platform": "",
-        "Component_1": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_2": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_3": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_4": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-        "Component_5": {"Pros": "", "Cons": "", "Design": "", "details": ""},
-    }),
-    structured_output = ComponentsMemory, 
+    structured_output=ComponentsMemory,
     # memory_update_prompt= "Read the newest response to the chat, and populate the json with factual imformation. JSON: {memory}",
     # memory_reply_prompt= "With the above instruction and chathistory, together with the following json that may or may not have recorded your proposal and comments, Do what the conversation delegation agent has asked you to. Json summary: {memory}",
     # llm_config=llm_config.update(response_format = ComponentsMemory),
     llm_config=llm_config,
-    # model_client = BOA_client, 
+    # model_client = BOA_client,
     code_execution_config=False,
     max_consecutive_auto_reply=10,
     human_input_mode="TERMINATE",
@@ -167,11 +132,10 @@ BOA = MemoryAgent(
 
 
 class CDMemory(BaseModel):
-    num_proposals:int|None =0
-    num_discussions: int|None =0
-    num_consensus: int|None =0
-    final_output_obtained: bool|None=False
-
+    PROPOSAL_COUNT: int | None = 0
+    DISCUSSION_ROUND: int | None = 0
+    CONCENSUS_COUNT: int | None = 0
+    final_output_obtained: bool | None = False
 
 
 CDA = MemoryAgent(
@@ -191,15 +155,15 @@ CDA = MemoryAgent(
     # Once all tasks are completed, you will summarize the overall design of the data pipeline, provide a high-level overview of the data pipeline's functionality, produce any required file, and end with "TERMINATE". """,
     system_message=generate_prompt("prompts/agents/conversation-delegation.prompt"),
     memory_json={
-        "Number of proposals": 0,
-        "number of discussions": 0,
-        "number of consensus": 0,
+        "PROPOSAL_COUNT": 0,
+        "DISCUSSION_ROUND": 0,
+        "CONCENSUS_COUNT": 0,
         "final output json obtained": "false",
     },
-    structured_output = CDMemory, 
+    structured_output=CDMemory,
     # llm_config=llm_config.update(response_format = ComponentsMemory),
     llm_config=llm_CDA_config,
-    # model_client = CDA_client, 
+    # model_client = CDA_client,
     code_execution_config=False,
     max_consecutive_auto_reply=10,
     human_input_mode="TERMINATE",
